@@ -1,0 +1,29 @@
+steps:
+# Generate all the migrations for 'database_01'
+- name: gcr.io/cloud-builders/docker
+  waitFor: ['-']
+  id: 'Generate Drizzle Migrations'
+  entrypoint: bash
+  args:
+  - -c
+  - |
+    docker run \
+    -v $(pwd):/app \
+    -e DATABASE_URL=${_DATABASE_URL} \
+    ealebed/drizzle-kit:v01 generate
+
+# Applying all the migrations for 'database_01'
+- name: gcr.io/cloud-builders/docker
+  waitFor: ['Generate Drizzle Migrations']
+  id: 'Apply Drizzle Migrations'
+  entrypoint: bash
+  args:
+  - -c
+  - |
+    docker run \
+    -v $(pwd):/app \
+    -e DATABASE_URL=${_DATABASE_URL} \
+    ealebed/drizzle-kit:v01 migrate
+
+options:
+  logging: CLOUD_LOGGING_ONLY
